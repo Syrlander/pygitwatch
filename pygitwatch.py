@@ -5,6 +5,22 @@ import sys
 import requests
 
 
+def send_notification(title, content):
+    """Displays a push notification on the desktop, using notify-send.
+    (This makes the script dependant on notify-send
+    Returns True: successful notification execution
+            False: unsuccessful notification execution"""
+    
+    # Construct the command
+    base_command = "notify-send"
+    resp = os.system(base_command + " '" + title + "' " + "'" + content + "'")
+    
+    # 0 == successfully executed
+    if (resp == 0):
+        return True
+    return False
+
+
 def get_input_string(msg):
     """Tries to get user input, kills application on KeyboardInterrupt"""
     try:
