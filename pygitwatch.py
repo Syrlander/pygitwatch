@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import atexit
 
 import Github_Api
 import Repeated_Timer
@@ -19,6 +20,11 @@ def send_notification(title, content):
 
     # 0 == successfully executed
     return not bool(resp)
+
+
+def on_exit(app_name):
+    """atexit register function, notify the user"""
+    send_notification(app_name, "Application closed.")
 
 
 def get_repo_json(github_session):
@@ -80,4 +86,6 @@ def Main(app_name=""):
     rp_timer = Repeated_Timer.RepeatedTimer(update_checker, 30.0)
 
 if __name__ == '__main__':
-    Main(app_name="Octowatch")
+    app_name = "Octowatch"
+    atexit.register(on_exit, app_name)
+    Main(app_name=app_name)

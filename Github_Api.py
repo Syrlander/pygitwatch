@@ -98,7 +98,7 @@ class Github_ApiHandler(object):
         if res.status_code == 200:
             return res.json()
         else:
-            raise Exception("Error: Unable to retrieve repos! (access token possibly configured incorrectly)")
+            raise Exception("Error: Unable to retrieve repos! (access token possibly configured incorrectly)\nFailed with status code: " + res.status_code)
 
     def get_repo_events(self, username, repo_name):
         """Returns all latest events from repo"""
