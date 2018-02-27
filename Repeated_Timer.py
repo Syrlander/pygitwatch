@@ -8,7 +8,7 @@ import time
 class RepeatedTimer(object):
     """Timer class which executes a given function every interval (seconds)"""
 
-    def __init__(self, func, interval, *args, **kwargs):
+    def __init__(self, func, interval, *args, auto_start=True, **kwargs):
         self.scheduler = sched.scheduler(time.time, time.sleep)
 
         self.func = func
@@ -17,8 +17,9 @@ class RepeatedTimer(object):
 
         self.interval = interval
 
-        # Start repeating
-        self.start()
+        # Start repeating at auto
+        if auto_start:
+            self.start()
 
     def __run(self):
         """Triggers the function"""

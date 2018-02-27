@@ -4,15 +4,7 @@ import os
 
 import Github_Api
 import Repeated_Timer
-
-# For debug pretty printing json
-import json
-
-
-def pp_json(j):
-    """Pretty prints given json (Debugging)"""
-    parsed = json.loads(j)
-    print(json.dumps(parsed, indent=4, sort_keys=True))
+import JSON_FileHandler
 
 
 def send_notification(title, content):
@@ -29,25 +21,60 @@ def send_notification(title, content):
     return not bool(resp)
 
 
-def Main():
+def get_repo_json(github_session):
+    """Returns repo json gotten from github api"""
+    ret_json = {}
+    repos_json = github_session.get_repos()
+    for repo_json in repos_json:
+        ret_json[repo_json['name']] = repo_json['pushed_at']
+    return ret_json
+
+
+def Main(app_name=""):
     """Program entrypoint"""
-    # Test token: 53ef1c95a035a7e7084077ce8dd2ec5af04123fb
+    # Temporary storage file name
+    temp_store_name = "repo_temp_storage.json"
+
+    # Create github session using github handler
+    # Test token (MUST BE REMOVED AND DELETED FROM GITHUB BEFORE DEPLOYING): 53ef1c95a035a7e7084077ce8dd2ec5af04123fb
     github_session = Github_Api.Github_ApiHandler(
         access_token="53ef1c95a035a7e7084077ce8dd2ec5af04123fb")
 
-    # Get list of authenticated users repos
-    repos = github_session.get_repos()
-    print(repos)
+    # Display starting message
+    send_notification(app_name, "Connected to Github")
 
-    # Get repo events test
-    # resp = github_session.get_repo_events("Nephz", "interaktionsdesign")
-    # for item in resp:
-    #     print(item, end="\n\n")
+    # Get previous repos from temp storage
+    global previous_repos
+    previous_repos = JSON_FileHandler.load_file(temp_store_name)
 
-    # Test of the RepeatedTimer
-    # def hello(name):
-    #     print("Hello " + name)
-    # rt = Repeated_Timer.RepeatedTimer(hello, 5.0, "World")
+    # If unable to find or load from temp storeage, get from github api
+    if not previous_repos:
+        previous_repos = get_repo_json(github_session)
+
+    def update_checker():
+        """Checks for changes between the current and the previous repo data"""
+        global previous_repos
+        print("Tick")
+
+        # Get the current repos
+        current_repos = get_repo_json(github_session)
+
+        # Check for changes between the two json objects
+        for repo in current_repos:
+            try:
+                if previous_repos[repo] != current_repos[repo]:
+                    send_notification(app_name, "Changes made to repo: " + repo)
+            except KeyError:
+                send_notification(app_name, "New repo created: " + repo)
+
+        # Set previous repos to current
+        previous_repos = current_repos
+
+        # Save current
+        JSON_FileHandler.save_file(temp_store_name, current_repos)
+
+    # Create repeating timer using the update_checker
+    rp_timer = Repeated_Timer.RepeatedTimer(update_checker, 30.0)
 
 if __name__ == '__main__':
-    Main()
+    Main(app_name="Octowatch")
