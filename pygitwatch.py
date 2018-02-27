@@ -54,7 +54,6 @@ def Main(app_name=""):
     def update_checker():
         """Checks for changes between the current and the previous repo data"""
         global previous_repos
-        print("Tick")
 
         # Get the current repos
         current_repos = get_repo_json(github_session)
@@ -65,6 +64,7 @@ def Main(app_name=""):
                 if previous_repos[repo] != current_repos[repo]:
                     send_notification(app_name, "Changes made to repo: " + repo)
             except KeyError:
+                # This error means that the repo can be found in storage, therefore it's a new repo
                 send_notification(app_name, "New repo created: " + repo)
 
         # Set previous repos to current
