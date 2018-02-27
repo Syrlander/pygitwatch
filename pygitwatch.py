@@ -36,9 +36,7 @@ def Main(app_name=""):
     temp_store_name = "repo_temp_storage.json"
 
     # Create github session using github handler
-    # Test token (MUST BE REMOVED AND DELETED FROM GITHUB BEFORE DEPLOYING): 53ef1c95a035a7e7084077ce8dd2ec5af04123fb
-    github_session = Github_Api.Github_ApiHandler(
-        access_token="53ef1c95a035a7e7084077ce8dd2ec5af04123fb")
+    github_session = Github_Api.Github_ApiHandler()
 
     # Display starting message
     send_notification(app_name, "Connected to Github")
@@ -66,6 +64,11 @@ def Main(app_name=""):
             except KeyError:
                 # This error means that the repo can be found in storage, therefore it's a new repo
                 send_notification(app_name, "New repo created: " + repo)
+
+        # Check for deleted repos
+        for repo in previous_repos:
+            if repo not in current_repos:
+                send_notification(app_name, "Deleted repo: " + repo)
 
         # Set previous repos to current
         previous_repos = current_repos
