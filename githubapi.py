@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+"""Util to simplify interaction with the github api"""
 
 import sys
 import requests

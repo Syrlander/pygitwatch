@@ -3,9 +3,10 @@
 import os
 import atexit
 
-import Github_Api
-import Repeated_Timer
-import JSON_FileHandler
+import githubapi
+import repeatedtimer
+import jsonfilehandler
+import customhooks
 
 
 def send_notification(title, content):
@@ -23,7 +24,7 @@ def send_notification(title, content):
 
 
 def on_exit(app_name):
-    """atexit register function, notify the user"""
+    """atexit register function; notify the user"""
     send_notification(app_name, "Application closed.")
 
 
@@ -36,20 +37,20 @@ def get_repo_json(github_session):
     return ret_json
 
 
-def Main(app_name=""):
+def Main(app_name="Application"):
     """Program entrypoint"""
     # Temporary storage file name
     temp_store_name = "repo_temp_storage.json"
 
     # Create github session using github handler
-    github_session = Github_Api.Github_ApiHandler()
+    github_session = githubapi.Github_ApiHandler()
 
     # Display starting message
     send_notification(app_name, "Connected to Github")
 
     # Get previous repos from temp storage
     global previous_repos
-    previous_repos = JSON_FileHandler.load_file(temp_store_name)
+    previous_repos = jsonfilehandler.load_file(temp_store_name)
 
     # If unable to find or load from temp storeage, get from github api
     if not previous_repos:
@@ -69,7 +70,7 @@ def Main(app_name=""):
                     send_notification(app_name, "Changes made to repo: " + repo)
             except KeyError:
                 # This error means that the repo can be found in storage, therefore it's a new repo
-                send_notification(app_name, "New repo created: " + repo)
+                send_notification(app_name, "Added repo: " + repo)
 
         # Check for deleted repos
         for repo in previous_repos:
@@ -80,12 +81,13 @@ def Main(app_name=""):
         previous_repos = current_repos
 
         # Save current
-        JSON_FileHandler.save_file(temp_store_name, current_repos)
+        jsonfilehandler.save_file(temp_store_name, current_repos)
 
     # Create repeating timer using the update_checker
-    rp_timer = Repeated_Timer.RepeatedTimer(update_checker, 30.0)
+    rp_timer = repeatedtimer.RepeatedTimer(update_checker, 30.0)
 
 if __name__ == '__main__':
     app_name = "Octowatch"
+
     atexit.register(on_exit, app_name)
     Main(app_name=app_name)

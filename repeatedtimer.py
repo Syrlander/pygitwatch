@@ -1,5 +1,4 @@
-#!/usr/bin/python3
-
+"""Repeated timer util"""
 # For the RepeatedTimer class
 import sched
 import time

@@ -1,5 +1,4 @@
-#!/usr/bin/python3
-"""Library to simplify interactions with json files"""
+"""Util to simplify interactions with json files"""
 
 import json
 
