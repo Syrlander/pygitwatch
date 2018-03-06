@@ -38,7 +38,6 @@ class UpdateChecker(object):
 
     def tick(self):
         """Function which makes the checks between the repo data"""
-        print("Tick")
         # Get current repos data
         current_repos = githubapi.get_reformatted_repo_json(self.github_session)
 

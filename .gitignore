@@ -3,5 +3,4 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.pyc
-access_token.txt
 repo_temp_storage.json
