@@ -1,0 +1,5 @@
+all tests needs to be executed with the following command:
+
+python3 -m unittest discover -v .. <TEST_FILE>
+
+This is needed to avoid excessive use of relative imports in each test file, due to the structure of the project.
