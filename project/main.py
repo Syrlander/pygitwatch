@@ -11,6 +11,7 @@ from util import jsonfilehandler
 from util import repeatedtimer
 from util import repeatedtimerfunc
 from util import sendnotification as SN
+from util import keyringhandler
 
 
 def on_exit(exit_hook, app_name=""):
@@ -24,8 +25,18 @@ def on_exit(exit_hook, app_name=""):
 
 def main(app_name=""):
     """Program entrypoint"""
+    # Try to read username and password from previous keyring
+    usr_file = ".usr.json"
+    usr = keyringhandler.get_username(usr_file)
+    if usr:
+        psw = keyringhandler.get_password(usr)
+
     # Create github session instance
-    github_session = githubapi.Github_ApiHandler()
+    if usr and psw:
+        pck = (usr, psw)
+        github_session = githubapi.Github_ApiHandler(usr_file=usr_file, auth=pck)
+    else:
+        github_session = githubapi.Github_ApiHandler(usr_file=usr_file)
 
     # Display successful login message
     SN.send_notification(app_name, "Connected to Github as user: " + github_session.usr)

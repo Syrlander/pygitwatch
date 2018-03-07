@@ -4,6 +4,8 @@ import requests
 import getpass
 import sys
 
+from util import keyringhandler
+
 
 def get_input_string(msg):
     """Tries to get user input, kills application on KeyboardInterrupt"""
@@ -25,10 +27,13 @@ def get_reformatted_repo_json(github_session):
 class Github_ApiHandler(object):
     """Github session class for a given github account"""
 
-    def __init__(self, base_url="https://api.github.com", auth=None):
+    def __init__(self, usr_file="", base_url="https://api.github.com", auth=None):
         """Class initializer"""
         # Api entrypoint
         self.base_url = base_url
+
+        # requests session
+        self.github_session = requests.Session()
 
         # Remaining rate limit default, 2 for auth request
         self.remaining_rate_limit = 2
@@ -36,20 +41,22 @@ class Github_ApiHandler(object):
         # Get auth
         if auth:
             self.auth = auth
+            self.usr = self.auth[0]
         else:
             # Get from manual input if no auth specified
             self.usr = get_input_string("Username: ")
             psw = getpass.getpass()
             self.auth = (self.usr, psw)
 
-        # requests session
-        self.github_session = requests.Session()
-
+        # Validate auth
         if not self.__validate_auth(self.auth):
             raise requests.ConnectionError("Invalid authentication")
         else:
             self.github_session.auth = self.auth
             self.__set_rate_limit()
+
+            keyringhandler.set_username(self.auth[0], usr_file)
+            keyringhandler.set_password(self.auth[0], self.auth[1])
 
     def __get_entrypoint(self, entrypoint, payload={}):
         """Sends a get request using the github session"""        
